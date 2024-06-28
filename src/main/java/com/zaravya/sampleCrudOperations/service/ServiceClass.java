@@ -1,60 +1,48 @@
 package com.zaravya.sampleCrudOperations.service;
 
 import com.zaravya.sampleCrudOperations.Entity.User;
+import com.zaravya.sampleCrudOperations.repo.JdbcRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ServiceClass {
 
-//     private  RepoInterface repoInterface;
     @Autowired
-private JdbcTemplate jdbcTemplate;
-    public User Savename( User user) {
-        String sql ="INSERT INTO User(id,name,address,email) VALUES(?,?,?,?)";
-        jdbcTemplate.update(sql,user.getId(),user.getName(),user.getEmail(),user.getAddress());
-        return user;
+    private JdbcRepository jdbcRepository;
+
+    public User save(User user) {
+        return jdbcRepository.save(user);
     }
 
-    public Optional<User> getnamebyid(Long id) {
-        String sql="SELECT * FROM user WHERE id=?";
-        return Optional.ofNullable(jdbcTemplate.queryForObject(
-                sql,
-                new Object[]{id},
-                (rs, rowNum) -> new User(
-                        rs.getLong("id"),
-                        rs.getString("name"),
-                        rs.getString("email"),
-                        rs.getString("address")
-                )
-        ));
+    public User findById(Long id) {
+        return jdbcRepository.findById(id);
     }
 
-    public List<User> getnames() {String sql = "SELECT * FROM user WHERE id = ?";
-        return jdbcTemplate.query("SELECT * FROM user",
-                (rs, rowNum) ->
-                        new User(rs.getLong("id"),
-                                rs.getString("name"), rs.getString("email"),rs.getString("address")));
-
-
+    public List<User> findAll() {
+        return jdbcRepository.findAll();
     }
 
-    public void deletebyid(Long id) {
-
-        String sql="DELETE FROM USER WHERE ID=?";
-        jdbcTemplate.update(sql,id);
-
-    }
-    public User  updateUser(Long id,  User user) {
-
-        String sql = "UPDATE User SET name=?, address=?, email=? WHERE id=?";
-        jdbcTemplate.update(sql, user.getName(), user.getAddress(), user.getEmail(), user.getId());
-        return user;
+    public void deleteById(Long id) {
+        jdbcRepository.deleteById(id);
     }
 
+    public User update(Long id, User user) {
+        return jdbcRepository.update(id, user);
+    }
+
+    public List<User> findByNames(String name) {
+        return jdbcRepository.findByNames(name);
+    }
+
+    public List<User> findByEmail(String email) {
+        return jdbcRepository.findByEmail(email);
+    }
+
+    public List<User> findUsersByDateRange(LocalDate startDate, LocalDate endDate) {
+        return jdbcRepository.findUsersByDateRange(startDate, endDate);
+    }
 }
-

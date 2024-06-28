@@ -3,9 +3,11 @@ package com.zaravya.sampleCrudOperations.controller;
 import com.zaravya.sampleCrudOperations.Entity.User;
 import com.zaravya.sampleCrudOperations.service.ServiceClass;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,30 +15,57 @@ import java.util.Optional;
 
 public class UserController {
 
-
     @Autowired
     private ServiceClass serviceClass;
 
-    @GetMapping("/names/{id}")
-    public Optional<User> getname(@PathVariable Long id) {
-        return serviceClass.getnamebyid(id);
+    @GetMapping("/getbyiduser")
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        Optional<User> user = Optional.ofNullable(serviceClass.findById(id));
+        return user.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
     }
 
-    @GetMapping("/name")
-    public List<User> getuserss() {
-        return serviceClass.getnames();
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = serviceClass.findAll();
+        return ResponseEntity.ok(users);
     }
-@PostMapping("/saving")
-    public User savename(@RequestBody User user) {
-    return serviceClass.Savename( user);
+
+    @PostMapping("/save")
+    public ResponseEntity<User> saveUser(@RequestBody User user) {
+        User savedUser = serviceClass.save(user);
+        return ResponseEntity.ok(savedUser);
     }
-   @PutMapping("/{id}")
-   public User updateEntity(@PathVariable Long id,@RequestBody User user) {
-      return serviceClass.updateUser(id,user);
-  }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
+        User updatedUser = serviceClass.update(id, user);
+        return ResponseEntity.ok(updatedUser);
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteById(@PathVariable Long id){
-        serviceClass.deletebyid(id);
-        return ResponseEntity.ok().body("User deleted successfully");
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+        serviceClass.deleteById(id);
+        return ResponseEntity.ok("User deleted successfully");
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<User>> getUsersByName(@RequestParam String name) {
+        List<User> users = serviceClass.findByNames(name);
+        return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/byemail")
+    public ResponseEntity<List<User>> getUsersByEmail(@RequestParam String email) {
+        List<User> users = serviceClass.findByEmail(email);
+        return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/dateRange")
+    public ResponseEntity<List<User>> getUsersByDateRange(
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate) {
+        List<User> users = serviceClass.findUsersByDateRange(startDate, endDate);
+        return ResponseEntity.ok(users);
     }
 }
