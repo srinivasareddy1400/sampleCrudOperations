@@ -2,9 +2,11 @@ package com.zaravya.sampleCrudOperations.controller;
 
 import com.zaravya.sampleCrudOperations.Entity.User;
 import com.zaravya.sampleCrudOperations.service.ServiceClass;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -18,11 +20,11 @@ public class UserController {
     @Autowired
     private ServiceClass serviceClass;
 
-    @GetMapping("/getbyiduser")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        Optional<User> user = Optional.ofNullable(serviceClass.findById(id));
-        return user.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable Long id) {
+        User user = serviceClass.findById(id);
+        return user;
+
     }
 
     @GetMapping("/users")
@@ -32,13 +34,13 @@ public class UserController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<User> saveUser(@RequestBody User user) {
+    public ResponseEntity<User> saveUser(@Valid @RequestBody User user) {
         User savedUser = serviceClass.save(user);
         return ResponseEntity.ok(savedUser);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
+    public ResponseEntity<User> updateUser(@PathVariable Long id,@Valid @RequestBody User user) {
         User updatedUser = serviceClass.update(id, user);
         return ResponseEntity.ok(updatedUser);
     }
@@ -67,5 +69,19 @@ public class UserController {
             @RequestParam LocalDate endDate) {
         List<User> users = serviceClass.findUsersByDateRange(startDate, endDate);
         return ResponseEntity.ok(users);
+    }
+    @GetMapping("/pagination")
+    public List<User> findAll(int page, int size) {
+        return serviceClass.findAll(page, size);
+    }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<String> exceptionHadler(MethodArgumentNotValidException ex){
+        StringBuilder errorMessage=new StringBuilder();
+        ex.getBindingResult().getAllErrors().forEach(error ->{
+            errorMessage.append(error.getDefaultMessage()).append("\n");
+
+        });
+       String  finalMessage =errorMessage.toString().trim();
+       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(finalMessage);
     }
 }

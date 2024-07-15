@@ -25,33 +25,23 @@ public class JdbcRepository {
                 rs.getDate("date").toLocalDate()
         ));
     }
-// JdbcRepository.java
 
     public User findById(Long id) {
-        String sql = "SELECT * FROM users WHERE id = ?";
+        String sql = "SELECT * FROM user WHERE id = ?";
         return jdbcTemplate.queryForObject(sql, new Object[]{id}, (rs, rowNum) -> {
             User user = new User();
             user.setId(rs.getLong("id"));
             user.setName(rs.getString("name"));
             user.setEmail(rs.getString("email"));
-
+            user.setAddress(rs.getString("address"));
             Optional.ofNullable(rs.getDate("date"))
                     .ifPresent(date -> user.setDate(date.toLocalDate()));
 
             return user;
-        });
+      });
     }
 
-//    public User findById(Long id) {
-//        String sql = "SELECT * FROM user WHERE id = ?";
-//        return jdbcTemplate.queryForObject(sql, new Object[]{id}, (rs, rowNum) -> new User(
-//                rs.getLong("id"),
-//                rs.getString("name"),
-//                rs.getString("address"),
-//                rs.getString("email"),
-//                rs.getDate("date").toLocalDate()
-//        ));
-//    }
+
 
     public User save(User user) {
         String sql = "INSERT INTO user (id, name, address, email, date) VALUES (?, ?, ?, ?, ?)";
@@ -102,4 +92,17 @@ public class JdbcRepository {
                 rs.getDate("date").toLocalDate()
         ));
     }
-}
+    public List<User> findAll(int page, int size) {
+        int offset = (page - 1) * size;
+        String sql = "SELECT * FROM user LIMIT ? OFFSET ?";
+        return jdbcTemplate.query(sql, new Object[]{size, offset}, (rs, rowNum) -> new User(
+                rs.getLong("id"),
+                rs.getString("name"),
+                rs.getString("address"),
+                rs.getString("email"),
+                rs.getDate("date").toLocalDate()
+        ));
+
+    }
+    }
+

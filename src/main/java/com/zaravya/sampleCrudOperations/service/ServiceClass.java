@@ -45,4 +45,7 @@ public class ServiceClass {
     public List<User> findUsersByDateRange(LocalDate startDate, LocalDate endDate) {
         return jdbcRepository.findUsersByDateRange(startDate, endDate);
     }
+    public List<User> findAll(int page, int size) {
+        return jdbcRepository.findAll(page, size);
+    }
 }
